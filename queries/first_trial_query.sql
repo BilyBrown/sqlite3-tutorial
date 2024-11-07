@@ -1,12 +1,20 @@
 SELECT
-  "client_intake"."UniqueID",
-  string_agg( CONCAT("public"."activity_plots"."PlotID"),', ' ) AS"Plots",
+  "client_intake"."unique_id",
+  string_agg( CONCAT("public"."activity_plots"."plot_id"),', ' ) AS"Plots",
   SUM("public"."gis_intake"."ga_total_gt") AS"GA Total GT",
-  SUM("public"."client_intake"."Client GT Current") AS"Client GT"
+  SUM("public"."client_intake"."client_gt_current") AS"Client GT"
 FROM
   client_intake
-JOIN "public"."activity_plots"
- ON client_intake."UniqueID" = "public"."activity_plots"."UniqueID"
+LEFT JOIN "public"."activity_plots"
+ ON client_intake."unique_id" = "public"."activity_plots"."unique_id"
 JOIN "public"."gis_intake"
- ON client_intake."UniqueID" = "public"."gis_intake"."uniqueid"
-GROUP BY"client_intake"."UniqueID", "gis_intake"."uniqueid";
+ ON client_intake."unique_id" = "public"."gis_intake"."uniqueid"
+WHERE public.client_intake.status IN ( 'OPEN','PENDING','IN PROCESS', 'POST' )
+GROUP BY"client_intake"."unique_id", "gis_intake"."uniqueid";
+
+
+SELECT
+  SUM( client_intake.client_gt_current ) AS sum_of_client_gt
+FROM
+  client_intake
+WHERE client_intake.status IN ( 'OPEN','PENDING','IN PROCESS', 'POST' ) ;
